@@ -1,0 +1,40 @@
+name: Rate AI Responses on Schedule
+
+on:
+  # This makes the job run automatically every hour.
+  schedule:
+    - cron: '0 * * * *'
+  
+  # This also allows you to run the job manually from the Actions tab.
+  workflow_dispatch:
+
+jobs:
+  rate-responses:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Check out your code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up a Python environment
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Step 3: Install the libraries from your requirements.txt file
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Run your Python script
+      - name: Run the rating script
+        env:
+          # This line securely passes your GitHub Secrets to the Python script
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NOTION_RESPONSES_DB_ID: ${{ secrets.NOTION_RESPONSES_DB_ID }}
+          # UPDATED: Use the new Page ID secret
+          NOTION_STANDARDS_PAGE_ID: ${{ secrets.NOTION_STANDARDS_PAGE_ID }}
+        run: python rate.py
